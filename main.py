@@ -59,14 +59,24 @@ def writln(d):
     global row
     global nowTime
 
-    book1 = xlrd.open_workbook(path)
-    book2 = copy(book1)
-    sheet = book2.get_sheet(nowTime)
-    row += 1
-    col =  0
-    for data in d:
-        sheet.write(row, col, data)
-        col += 1
+    book1  = xlrd.open_workbook(path)
+    book2  = copy(book1)
+    sheet1 = book2.get_sheet(nowTime)
+    sheet2 = book1.sheet_by_name(nowTime)
+    repl   = False
+    for i in range(row):
+        rows  = sheet2.row_values(i)
+        if (rows[0] == d[0] and rows[1] == d[1] and rows[2] == d[2]):
+            rowr = i
+            repl = True
+    if repl:
+        sheet1.write(rowr, 3, d[3])
+    else:
+        row += 1
+        col =  0
+        for data in d:
+            sheet1.write(row, col, data)
+            col += 1
     book2.save(path)
 
 
