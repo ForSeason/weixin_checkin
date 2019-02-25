@@ -1,10 +1,21 @@
 import itchat
+import os
+import time
+import datetime
 import re
 import xlrd
 import xlwt
 from xlutils.copy import copy
 
-row = 0
+global row
+global path
+global nowTime
+
+
+row  = 0
+path = 'output.xls'
+nowTime = datetime.datetime.now().strftime('%Y%m%d')
+
 
 @itchat.msg_register(itchat.content.TEXT)
 def main(msg):
@@ -18,28 +29,45 @@ def main(msg):
         writln(d1)
 
 def init():
-    d     = ['班级', '宿舍楼', '宿舍号', '回寝情况']
-    book  = xlwt.Workbook()
-    sheet = book.add_sheet('s1')
+
+    global path
+    global nowTime
     global row
-    row   = 0
-    col   = 0
+
+    if os.path.exists(path):
+        book1 = xlrd.open_workbook(path)
+        book  = copy(book1)
+        if nowTime in book1.sheet_names():
+           sheet = book1.sheet_by_name(nowTime)
+           cols  = sheet.col_values(0)
+           row   = len(cols) - 1
+           return
+    else:
+        book  = xlwt.Workbook()
+    sheet = book.add_sheet(nowTime)
+    d   = ['班级', '宿舍楼', '宿舍号', '回寝情况']
+    row = 0
+    col = 0
     for title in d:
         sheet.write(row, col, title)
         col += 1
-    book.save('output.xls')
+    book.save(path)
 
 def writln(d):
-    book1 = xlrd.open_workbook('output.xls')
-    book2 = copy(book1)
-    sheet = book2.get_sheet(0)
+
+    global path
     global row
+    global nowTime
+
+    book1 = xlrd.open_workbook(path)
+    book2 = copy(book1)
+    sheet = book2.get_sheet(nowTime)
     row += 1
     col =  0
     for data in d:
         sheet.write(row, col, data)
         col += 1
-    book2.save('output.xls')
+    book2.save(path)
 
 
 init()

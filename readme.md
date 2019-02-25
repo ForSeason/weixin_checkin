@@ -7,4 +7,4 @@
 
 # run:
 
-python3 main.py
+double click run.bat
