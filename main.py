@@ -1,93 +1,68 @@
-import itchat
-import os
-import time
-import datetime
-import re
-import xlrd
-import xlwt
+import itchat, os, time, datetime, re, xlrd, xlwt
 from xlutils.copy import copy
-
-global row
-global path
-global nowTime
-
-
-row  = 0
-path = 'output.xls'
-nowTime = datetime.datetime.now().strftime('%Y%m%d')
-
+from settings import const
 
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
     text  = (msg.text)
     text  = text.replace(' ', '')
-    d1    = re.findall('光一|光二|应物|严班|[Cc][14]|\d{3}', text)
+    d1    = re.findall(const.pattern1, text)
     if len(d1) == 3:
         d1[1] = d1[1].upper()
-        d2    = re.split('光一|光二|应物|严班|[Cc][14]|\d{3}', text)
-        if re.match('全员归寝无异常|全员回寝无异常|^全?齐$', d2[-1]):
+        d1[2] = d1[1] + '-' + d1[2]
+        d2    = re.split(const.pattern1, text)
+        if re.match(const.pattern2, d2[-1]):
             d2[-1] = '√'
         d1.append(d2[-1])
         writln(d1)
 
 def init():
-
-    global path
-    global nowTime
-    global row
-
-    if os.path.exists(path):
-        book1 = xlrd.open_workbook(path)
+    if os.path.exists(const.path):
+        book1 = xlrd.open_workbook(const.path)
         book  = copy(book1)
-        if nowTime in book1.sheet_names():
-           sheet = book1.sheet_by_name(nowTime)
-           cols  = sheet.col_values(0)
-           row   = len(cols) - 1
-           return
+        if const.sheetname2 not in book1.sheet_names():
+            book.add_sheet(const.sheetname2)
     else:
         book  = xlwt.Workbook()
-    sheet = book.add_sheet(nowTime)
-    d   = ['班级', '宿舍楼', '宿舍号', '回寝情况']
-    row = 0
-    col = 0
-    for title in d:
-        sheet.write(row, col, title)
-        col += 1
-    book.save(path)
+        book.add_sheet(const.sheetname2)
+    book.save(const.path)
+    replace_xls()
+
+def replace_xls():
+    book  = xlrd.open_workbook(const.filename)
+    sheet1 = book.sheet_by_name(const.sheetname)
+    book1  = xlrd.open_workbook(const.filename2)
+    book2  = copy(book1)
+    sheet2 = book2.get_sheet(const.sheetname2)
+    rows = sheet1.nrows
+    cols = sheet1.ncols
+    for i in range(rows):
+        for j in range(cols):
+            sheet2.write(i, j, sheet1.cell(i ,j).value)
+    book2.save(const.filename2)
+
 
 def writln(d):
-
-    global path
-    global row
-    global nowTime
-
-    book1  = xlrd.open_workbook(path)
+    book1  = xlrd.open_workbook(const.path)
     book2  = copy(book1)
-    sheet1 = book2.get_sheet(nowTime)
-    sheet2 = book1.sheet_by_name(nowTime)
+    sheet1 = book1.sheet_by_name(const.sheetname2)
+    sheet2 = book2.get_sheet(const.sheetname2)
+    rows = sheet1.nrows
+    cols = sheet1.ncols
     repl   = False
-    for i in range(row + 1):
-        rows  = sheet2.row_values(i)
-        if (rows[0] == d[0] and rows[1] == d[1] and rows[2] == d[2]):
+    for i in range(rows):
+        row = sheet1.row_values(i)
+        if (row[0] == d[0] and row[1] == d[1] and row[2] == d[2]):
             rowr = i
             repl = True        
-    print('Covered: ', repl)
     if repl:
-        sheet1.write(rowr, 3, d[3])
-        log(d, rowr + 1)
-    else:
-        row += 1
-        col =  0
-        for data in d:
-            sheet1.write(row, col, data)
-            col += 1
-        log(d, row + 1)
-    book2.save(path)
+        sheet2.write(rowr, const.day+4, d[3])
+        print('writing successfully')
+    print(d)
+    print('====================================================')
+    book2.save(const.path)
 
-def log(d, row):
-    print(d, ' has been written in row ', row)
-    print('####################')
 
 init()
-itchat.auto_login(enableCmdQR=2, hotReload=True)
+itchat.auto_login(enableCmdQR=False, hotReload=True)
 itchat.run()
