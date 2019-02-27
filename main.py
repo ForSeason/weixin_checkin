@@ -1,4 +1,4 @@
-import itchat, os, time, datetime, re, xlrd, xlwt
+import itchat, os, re, xlrd, xlwt
 from xlutils.copy import copy
 from settings import const
 
