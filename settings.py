@@ -4,11 +4,11 @@ from datetime import datetime
 
 const.pattern1 = '光一|光二|应物|严班|[Cc][14]|\d{3}'
 const.pattern2 = '全员归寝无异常|全员回寝无异常|^全?齐$'
-const.path = 'data.xlsx'
+const.path = 'data.xls'
 const.week0 = 7
 const.sheetname = 'template'
 # const.sheetname2 defined in main.py
-const.filename = 'template.xlsx'
+const.filename = 'template.xls'
 const.filename2 = const.path
 
 
