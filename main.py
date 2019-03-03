@@ -17,29 +17,36 @@ def main(msg):
         writln(d1)
 
 def init():
-    if os.path.exists(const.path):
+    print('Initializing...')
+    if os.path.exists(const.path): # check const.path if exists
+        print('File ', const.path, ' exists')
         book1 = xlrd.open_workbook(const.path)
         book  = copy(book1)
         if const.sheetname2 not in book1.sheet_names():
             book.add_sheet(const.sheetname2)
+            print('Sheet ', const.sheetname2, ' is not in ', const.path)
+            book.save(const.path)
+            initializeSheet()
     else:
+        print('File ', const.path, 'does not exist')
         book  = xlwt.Workbook()
         book.add_sheet(const.sheetname2)
-    book.save(const.path)
-    replace_xls()
+        book.save(const.path)
+    print('Initialization done')
 
-def replace_xls():
-    book  = xlrd.open_workbook(const.filename)
+def initializeSheet():
+    book   = xlrd.open_workbook(const.filename)
     sheet1 = book.sheet_by_name(const.sheetname)
     book1  = xlrd.open_workbook(const.filename2)
     book2  = copy(book1)
     sheet2 = book2.get_sheet(const.sheetname2)
-    rows = sheet1.nrows
-    cols = sheet1.ncols
+    rows   = sheet1.nrows
+    cols   = sheet1.ncols
     for i in range(rows):
         for j in range(cols):
             sheet2.write(i, j, sheet1.cell(i ,j).value)
     book2.save(const.filename2)
+    print('Sheet ', const.sheetname2, 'has been initialized')
 
 
 def writln(d):
@@ -47,8 +54,8 @@ def writln(d):
     book2  = copy(book1)
     sheet1 = book1.sheet_by_name(const.sheetname2)
     sheet2 = book2.get_sheet(const.sheetname2)
-    rows = sheet1.nrows
-    cols = sheet1.ncols
+    rows   = sheet1.nrows
+    cols   = sheet1.ncols
     repl   = False
     for i in range(rows):
         row = sheet1.row_values(i)
