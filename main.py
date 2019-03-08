@@ -1,9 +1,11 @@
-import itchat, os, re, xlrd, xlwt
+import itchat, os, re, xlrd, xlwt, time
 from xlutils.copy import copy
 from settings import const
 
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
+    if int(time.strftime("%H", time.localtime())) == 0:
+        init()
     text  = (msg.text)
     text  = text.replace(' ', '')
     d1    = re.findall(const.pattern1, text)
@@ -32,6 +34,7 @@ def init():
         book  = xlwt.Workbook()
         book.add_sheet(const.sheetname2)
         book.save(const.path)
+        initializeSheet()
     print('Initialization done')
 
 def initializeSheet():
@@ -71,5 +74,5 @@ def writln(d):
 
 
 init()
-itchat.auto_login(enableCmdQR=False, hotReload=True)
+itchat.auto_login(enableCmdQR=2)
 itchat.run()
