@@ -1,14 +1,15 @@
 import itchat, os, re, xlrd, xlwt, time
 from xlutils.copy import copy
-from settings import const
+from settings import settings
 
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
+    reply = False
     if int(time.strftime("%H", time.localtime())) == 0:
         init()
     text  = (msg.text)
     text  = text.replace(' ', '')
-    d1    = re.findall(const.pattern1, text)
+    d1    = list(re.findall(const.pattern1, text)[0]) if (re.match(const.pattern1, text)) else []
     if len(d1) == 3:
         d1[1] = d1[1].upper()
         d1[2] = d1[1] + '-' + d1[2]
@@ -16,10 +17,14 @@ def main(msg):
         if re.match(const.pattern2, d2[-1]):
             d2[-1] = '√'
         d1.append(d2[-1])
-        writln(d1)
+        reply = writln(d1)
+    if reply:
+        itchat.send(d1[0] + d1[2] + '打卡成功', toUserName = msg['FromUserName'])
+        
 
 def init():
     print('Initializing...')
+    const.reflesh()
     if os.path.exists(const.path): # check const.path if exists
         print('File ', const.path, ' exists')
         book1 = xlrd.open_workbook(const.path)
@@ -66,13 +71,14 @@ def writln(d):
             rowr = i
             repl = True        
     if repl:
-        sheet2.write(rowr, const.day+4, d[3])
+        sheet2.write(rowr, const.fakeday + 4, d[3])
         print('writing successfully')
     print(d)
     print('====================================================')
     book2.save(const.path)
+    return True
 
-
+const = settings()
 init()
 itchat.auto_login(enableCmdQR=2)
 itchat.run()
