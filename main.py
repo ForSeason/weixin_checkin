@@ -5,6 +5,7 @@ from settings import settings
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
     reply = False
+    const.reflesh()
     if int(time.strftime("%H", time.localtime())) == 0:
         init()
     text  = (msg.text)
@@ -24,7 +25,6 @@ def main(msg):
 
 def init():
     print('Initializing...')
-    const.reflesh()
     if os.path.exists(const.path): # check const.path if exists
         print('File ', const.path, ' exists')
         book1 = xlrd.open_workbook(const.path)
