@@ -1,35 +1,33 @@
 import itchat, os, re, xlrd, xlwt, time
 from xlutils.copy import copy
-from settings import settings
+from settings import const
 
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
-    reply = False
+    if int(time.strftime("%H", time.localtime())) == 0:
+        init()
     text  = (msg.text)
     text  = text.replace(' ', '')
     d1    = list(re.findall(const.pattern1, text)[0]) if (re.match(const.pattern1, text)) else []
+    repl  = False
     if len(d1) == 3:
         d1[1] = d1[1].upper()
         d1[2] = d1[1] + '-' + d1[2]
-        d2    = re.split(const.pattern1, text)
-        if re.match(const.pattern2, d2[-1]):
-            d2[-1] = '√'
-        d1.append(d2[-1])
-        init()
-        reply = writln(d1)
-    if reply:
-        response = d1[0] + d1[2] + '打卡成功'
-        if int(time.strftime("%H", time.localtime())) not in [20, 21, 22]:
-            if len(lateList()) > 0:
-                response += '\n'
-                response += '截至' + time.strftime("%H:%M", time.localtime()) + ', 以下宿舍仍未上报:\n'
-                response += ', '.join(lateList())
-        itchat.send(response, toUserName = msg['FromUserName'])
-        
+        d2    = re.split(const.pattern1, text)[-1]
+        if re.match(const.pattern3, d2):
+            d2    = re.findall(const.pattern3, re.split(const.pattern1, text)[-1])[0]
+            d2    = list(d2)
+            if len(d2) == 2:
+                if re.match(const.pattern2, d2[0]):
+                    d2[0] = '√'
+                d1.append(d2[0])
+                d1.append(d2[1])
+                repl = writln(d1)
+    if repl:
+        itchat.send(d1[0] + d1[2] + '打卡成功', toUserName = msg['FromUserName'])
 
 def init():
     print('Initializing...')
-    const.reflesh()
     if os.path.exists(const.path): # check const.path if exists
         print('File ', const.path, ' exists')
         book1 = xlrd.open_workbook(const.path)
@@ -76,25 +74,15 @@ def writln(d):
             rowr = i
             repl = True        
     if repl:
-        sheet2.write(rowr, const.fakeday + 4, d[3])
+        sheet2.write(rowr, const.day+4, d[3])
+        sheet2.write(rowr, 11, d[4])
         print('writing successfully')
     print(d)
     print('====================================================')
     book2.save(const.path)
-    return True
+    return repl
 
-def lateList():
-    book1  = xlrd.open_workbook(const.path)
-    sheet1 = book1.sheet_by_name(const.sheetname2)
-    rows   = sheet1.nrows
-    cols   = sheet1.ncols
-    res    = []
-    for i in range(rows):
-        row = sheet1.row_values(i)
-        if (row[const.fakeday + 4] == ''):
-            res.append(row[0] + row[2])
-    return res
-const = settings()
+
 init()
 itchat.auto_login(enableCmdQR=2)
 itchat.run()
