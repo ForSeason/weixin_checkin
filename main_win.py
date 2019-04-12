@@ -96,5 +96,5 @@ def lateList():
     return res
 const = settings()
 init()
-itchat.auto_login(enableCmdQR=2)
+itchat.auto_login()
 itchat.run()
