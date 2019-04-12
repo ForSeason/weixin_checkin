@@ -1,6 +1,6 @@
 import itchat, os, re, xlrd, xlwt, time
 from xlutils.copy import copy
-from settings import settings
+from settings_win import settings_win
 
 @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
 def main(msg):
