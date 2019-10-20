@@ -11,7 +11,7 @@ class settings():
         self.pattern1   = '(光一|光二|应物|严班)([Cc][14])(\d{3})'
         self.pattern2   = '全员归寝无异常|全员回寝无异常|^全?齐$'
         self.pattern3   = '(.*?)(\d{11})'
-        self.path       = 'dormitory.xls'
+        self.path       = 'C:/Users/User/Desktop/dormitory.xls'
         # self.path       = 'dormitory.xls'
         self.sheetname  = 'template'
         self.sheetname2 = str(self.fakeweek)
